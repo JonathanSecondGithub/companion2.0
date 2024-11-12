@@ -66,7 +66,7 @@ def register_user(request):
                 'message': 'User registered successfully!',
                 'user': {
                     'username': user.username,
-                    'email': user.email
+                    'password': user.password
                 }
             }, status=status.HTTP_201_CREATED)
         else:

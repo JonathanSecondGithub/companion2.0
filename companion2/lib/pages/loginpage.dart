@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
           Uri.parse(
               //192.168.100.7:8000 - local ip
               //127.0.0.1:8000 - device ip
-              'http://192.168.100.7:8000/api/login/'), // Update with your Django URL
+              'http://127.0.0.1:8000/api/login/'), // Update with your Django URL
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'username': username,

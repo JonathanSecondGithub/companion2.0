@@ -28,7 +28,9 @@ class _RegisterPageState extends State<RegisterPage> {
       try {
         final response = await http.post(
           Uri.parse(
-              'http://127.0.0.1:8000/api/register/'), // Update with your Django URL
+              //192.168.100.7:8000 - local ip
+              //127.0.0.1:8000 - device ip
+              'http://192.168.100.7:8000/api/register/'), // Update with your Django URL
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'username': username,

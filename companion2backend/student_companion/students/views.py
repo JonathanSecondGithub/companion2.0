@@ -12,6 +12,10 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer  # create a serializer for registration
 
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 # Create your views here.
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.all()
@@ -48,3 +52,23 @@ def login_view(request):
     
     # If authentication succeeds
     return JsonResponse({'message': 'Login successful'}, status=200)
+
+@api_view(['POST'])
+def register_user(request):
+    if request.method == 'POST':
+        # Deserialize the incoming data
+        serializer = RegisterSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            # Save the new user
+            user = serializer.save()
+            return Response({
+                'message': 'User registered successfully!',
+                'user': {
+                    'username': user.username,
+                    'email': user.email
+                }
+            }, status=status.HTTP_201_CREATED)
+        else:
+            # Return error messages if the validation failed
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

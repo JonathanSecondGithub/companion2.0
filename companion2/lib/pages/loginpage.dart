@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'token_storage.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -43,8 +44,17 @@ class _LoginPageState extends State<LoginPage> {
         // Handle different status codes
         if (response.statusCode == 200) {
           // Successful login
+          final responseData = jsonDecode(response.body);
+          // final accessToken = responseData['access'];
+          // final refreshToken = responseData['refresh'];
+
+          //###################################
+
           await _storage.write(key: 'accessToken', value: data['access']);
           await _storage.write(key: 'refreshToken', value: data['refresh']);
+
+          // Save the token for future use
+          await TokenStorage.saveToken(data['access']);
 
           Navigator.pushReplacementNamed(context, '/homepage');
           ScaffoldMessenger.of(context).showSnackBar(

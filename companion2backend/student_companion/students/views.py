@@ -16,6 +16,9 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+
 # Create your views here.
 class StudentViewSet(viewsets.ModelViewSet):
     queryset = Student.objects.all()
@@ -72,3 +75,15 @@ def register_user(request):
         else:
             # Return error messages if the validation failed
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# get user details        
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_details(request):
+    try:
+        # Retrieve the student details for the authenticated user
+        student = Student.objects.get(user=request.user)
+        serializer = StudentSerializer(student)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Student.DoesNotExist:
+        return Response({"error": "Student details not found."}, status=status.HTTP_404_NOT_FOUND)

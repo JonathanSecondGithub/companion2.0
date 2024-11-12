@@ -1,12 +1,8 @@
-import 'package:companion2/pages/bookhostel.dart';
-import 'package:companion2/pages/contactsdirectory.dart';
-import 'package:companion2/pages/coursematerials.dart';
-import 'package:companion2/pages/documentsrequest.dart';
-import 'package:companion2/pages/groups.dart';
-import 'package:companion2/pages/schoolmap.dart';
 import 'package:companion2/pages/sessionreporting.dart';
-import 'package:companion2/pages/studentid.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import 'attendancepage.dart';
 import 'assignmentspage.dart';
 import 'catspage.dart';
@@ -18,19 +14,25 @@ import 'timetablepage.dart';
 import 'deferpage.dart';
 import 'announcementspage.dart';
 import 'complaintspage.dart';
-// import 'documentsrequest.dart';
-// import 'groups.dart';
-// import 'coursematerials.dart';
-// import 'schoolmap.dart';
-// import 'contactsdirectory.dart';
-// import 'studentid.dart';
-// import 'bookhostelpage.dart';
+import 'bookhostel.dart';
+import 'contactsdirectory.dart';
+import 'coursematerials.dart';
+import 'documentsrequest.dart';
+import 'groups.dart';
+import 'schoolmap.dart';
+import 'studentid.dart';
+import 'token_storage.dart';
 
-class HomePage extends StatelessWidget {
-  final String studentName = "John Doe";
-  final String courseName = "Bachelor of Computer Science";
-  final String yearOfStudy = "3rd Year";
-  final String semester = "2nd Semester";
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String studentName = "";
+  String courseName = "";
+  String yearOfStudy = "";
+  String semester = "";
 
   final List<Map<String, String>> categories = [
     {
@@ -133,6 +135,38 @@ class HomePage extends StatelessWidget {
     {"name": "ID", "emoji": "🆔", "description": "Student ID information"},
   ];
 
+  Future<void> fetchUserDetails() async {
+    final token = await TokenStorage.getToken(); // Access the stored token
+    final response = await http.get(
+      Uri.parse(
+          'http://127.0.0.1:8000/api/user-details/'), // Replace with your backend URL
+      headers: {
+        'Authorization': 'Bearer $token', // Replace with actual token
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        studentName = data['name'];
+        courseName = data['course'];
+        yearOfStudy = "Year ${data['year_of_study']}";
+        semester = "Semester ${data['semester']}";
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch user details')),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserDetails();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,11 +210,11 @@ class HomePage extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                     Text(
-                      'Year: $yearOfStudy',
+                      yearOfStudy,
                       style: TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                     Text(
-                      'Semester: $semester',
+                      semester,
                       style: TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                   ],
@@ -306,8 +340,7 @@ class HomePage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    SessionReportingPage()), // Replace with your actual page
+                                builder: (context) => SessionReportingPage()),
                           );
                           break;
                         case "Book Hostel":
